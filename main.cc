@@ -1,8 +1,44 @@
 #include "b.h"
 #include "a.h"
+#include <cstddef>
 #include<iostream>
 #include<vector>
 #include<algorithm>
+#include<functional>
+
+auto func(const int& a){
+    return a * 2;
+}
+
+auto func2(int a){
+    return a * 2;
+}
+
+namespace test {
+    template<typename T>
+    auto map(std::vector<T>& vec, std::function<T(const T&)> func) -> std::vector<T> {
+        auto list = std::vector<T>{};
+        for(auto i : vec){
+            auto el = func(i);
+            list.emplace_back(std::move(el));
+        }
+        return list;
+    }
+    // fuction pointer
+    // return (name) (param)
+    auto map_without_closure(std::vector<int>&vec,int callback(int, void*), void* args) -> std::vector<int>{
+        auto v = std::vector<int>{};
+        for(auto i:vec){
+            auto a = callback(i, args);
+            v.emplace_back(std::move(a));
+        }
+        return v;
+    }   
+}
+
+struct NArgs {
+    int n;
+};
 
 int main(){
     std::printf("a: %d\n", getA());
@@ -56,13 +92,16 @@ int main(){
     }
     std::cout << "\n";
 
+    auto d_ = B::Dummy{
+        .a = 1
+    };
     auto number = 0;
 
     // lambda capture
-    //Lambda捕获允许lambda表达式访问其定义范围之外的变量。
-    //捕获列表中可以指定要捕获的变量，以及是按值捕获还是按引用捕获。
-    //"&"用于按引用捕获变量
-    //此时捕获了number的引用，可在函数体内直接访问和修改number的值
+    // Lambda捕获允许lambda表达式访问其定义范围之外的变量。
+    // 捕获列表中可以指定要捕获的变量，以及是按值捕获还是按引用捕获。
+    // "&"用于按引用捕获变量
+    // 此时捕获了number的引用，可在函数体内直接访问和修改number的值
     auto changeOut = [&number](){
         // auto n = number;
         // n += 100;
@@ -78,18 +117,37 @@ int main(){
 
     //按值捕获示例
     auto Getnumber = [number](){
-        std::cout << "number = " << number << "\n";
+        std::cout << "number = " << number << std::endl;
     };
     // 等效
     // auto Getnumber = [=](){
     //     std::cout << "number = " << number << "\n";
     // };
+    Getnumber(); // 输出0
+    changeOut();
+    Getnumber(); // 输出0
+    changeOut();
+    changeOut();
 
-    Getnumber(); // 输出0
-    changeOut();
-    Getnumber(); // 输出0
-    changeOut();
-    changeOut();
+    auto n = 10;
+    auto r = test::map<int>(v, [](const int& a){
+        return a * 2;
+    });
+    
+    auto args = NArgs{
+        .n = n
+    };
+    auto r2 = test::map_without_closure(r, [](int a, void* args){
+            auto& nargs = *static_cast<NArgs*>(args);
+            return a*nargs.n;
+        }, 
+        &args
+    );
+
+    for (auto& i : r){
+        std::cout << i << " ";
+    }
+    std::cout << "\n";
 
     return 0;
 }
