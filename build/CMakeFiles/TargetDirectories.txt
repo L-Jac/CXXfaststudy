@@ -1,4 +1,0 @@
-D:/C++/CLang/build/CMakeFiles/test.dir
-D:/C++/CLang/build/CMakeFiles/a.dir
-D:/C++/CLang/build/CMakeFiles/edit_cache.dir
-D:/C++/CLang/build/CMakeFiles/rebuild_cache.dir
